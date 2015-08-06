@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
--- file name : .vhd
+-- file name : glb_stellar_cmd.vhd
 --
 -- author    : e. barhorst
 --
@@ -68,7 +68,7 @@ library ieee;
 -- Entity declaration
 --------------------------------------------------------------------------------
 
-entity gbl_stellar_cmd is
+entity stellar_cmd is
 generic (
    START_ADDR   : std_logic_vector(27 downto 0) := x"0000000";
    STOP_ADDR    : std_logic_vector(27 downto 0) := x"0000010"
@@ -81,6 +81,7 @@ port (
    out_cmd_val      : out std_logic;
    in_cmd           : in  std_logic_vector(63 downto 0);
    in_cmd_val       : in  std_logic;
+   cmd_always_ack   : in  std_logic;
    -- Register interface
    clk_reg          : in  std_logic;                    --register interface is synchronous to this clock
    out_reg          : out std_logic_vector(31 downto 0);--caries the out register data
@@ -97,13 +98,13 @@ port (
    mbx_in_reg       : in  std_logic_vector(31 downto 0);--value of the mailbox to send
    mbx_in_val       : in  std_logic                     --pulse to indicate mailbox is valid
 );
-end entity gbl_stellar_cmd;
+end entity stellar_cmd;
 
 --------------------------------------------------------------------------------
 -- Architecture declaration
 --------------------------------------------------------------------------------
 
-architecture arch_stellar_cmd of gbl_stellar_cmd is
+architecture arch_stellar_cmd of stellar_cmd is
 
 -----------------------------------------------------------------------------------
 -- Constant declarations
@@ -230,7 +231,7 @@ begin
       end if;
 
       --generate the read req pulse when the address is in the modules range
-      if (in_cmd_val = '1' and in_cmd(63 downto 60) = CMD_RD and in_cmd(59 downto 32) >= start_addr and in_cmd(59 downto 32) <= stop_addr) then
+      if ((in_cmd_val = '1' and in_cmd(63 downto 60) = CMD_RD and in_cmd(59 downto 32) >= start_addr and in_cmd(59 downto 32) <= stop_addr) or cmd_always_ack = '1') then
          register_rd <= '1';
       else
          register_rd <= '0';
